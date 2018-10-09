@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!--Generates a urdf from the macro in kr90r2700proUAP_macro.xacro -->
+<robot name="kuka_kr90r2700prouap" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="kr90r2700prouap_macro.xacro" />
+    <xacro:kuka_kr90r2700prouap prefix=""/>
+</robot>

@@ -1,0 +1,14 @@
+rate: 250
+controller_list:
+  - name: fake_arm_controller
+    joints:
+      - joint_a1
+      - joint_a2
+      - joint_a3
+      - joint_a4
+      - joint_a5
+      - joint_a6
+  - name: fake_table_controller
+    joints:
+      - joint_t1
+state_publish_rate: 250

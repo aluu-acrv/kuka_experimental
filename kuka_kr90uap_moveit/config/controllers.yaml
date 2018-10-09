@@ -1,0 +1,16 @@
+controller_list:
+  - name: position_trajectory_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    publish_rate: 250
+    joints:
+      - joint_a1
+      - joint_a2
+      - joint_a3
+      - joint_a4
+      - joint_a5
+      - joint_a6
+  - name: fake_table_controller
+    joints:
+      - joint_t1
+state_publish_rate: 250

@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: kuka_kr90uap_support
+    relative_path: urdf/kr90r2700prouap.urdf
+  SRDF:
+    relative_path: config/kuka_kr90r2700prouap.srdf
+  CONFIG:
+    author_name: Rune Rasmussen
+    author_email: r.rasmussen@qut.edu.au
+    generated_timestamp: 1526533766

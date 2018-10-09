@@ -48,7 +48,7 @@ namespace kuka_rsi_hw_interface
 KukaHardwareInterface::KukaHardwareInterface() :
     joint_position_(6, 0.0), joint_velocity_(6, 0.0), joint_effort_(6, 0.0), joint_position_command_(6, 0.0), joint_velocity_command_(
         6, 0.0), joint_effort_command_(6, 0.0), joint_names_(6), rsi_initial_joint_positions_(6, 0.0), rsi_joint_position_corrections_(
-        6, 0.0), ipoc_(0), n_dof_(6)
+        6, 0.0), ipoc_(0), n_dof_(6), limits(6)
 {
   in_buffer_.resize(1024);
   out_buffer_.resize(1024);
@@ -76,6 +76,15 @@ KukaHardwareInterface::KukaHardwareInterface() :
         hardware_interface::JointHandle(joint_state_interface_.getHandle(joint_names_[i]),
                                         &joint_position_command_[i]));
   }
+  
+  double scaling = 0.05;
+  limits[0] = (136.0/250.0)*scaling;
+  limits[1] = (130.0/250.0)*scaling;
+  limits[2] = (120.0/250.0)*scaling;
+  limits[3] = (292.0/250.0)*scaling;
+  limits[4] = (258.0/250.0)*scaling;
+  limits[5] = (284.0/250.0)*scaling;
+  
 
   // Register interfaces
   registerInterface(&joint_state_interface_);
@@ -116,13 +125,44 @@ bool KukaHardwareInterface::read(const ros::Time time, const ros::Duration perio
 bool KukaHardwareInterface::write(const ros::Time time, const ros::Duration period)
 {
   out_buffer_.resize(1024);
+  
+  //bool is_range_error = false;
+  double v = 0.0;
 
   for (std::size_t i = 0; i < n_dof_; ++i)
   {
     rsi_joint_position_corrections_[i] = (RAD2DEG * joint_position_command_[i]) - rsi_initial_joint_positions_[i];
+    //std::cout << (DEG2RAD * rsi_initial_joint_positions_[i]) << " ";
+    rsi_initial_joint_positions_[i] = (RAD2DEG * joint_position_command_[i]);
+    v = v + rsi_joint_position_corrections_[i];
   }
+  //std::cout << std::endl;
+  /*
+  if(v != 0)
+  {
+      for (std::size_t i = 0; i < n_dof_; ++i)
+      {
+        
+        std::cout << joint_position_command_[i] << " ";
+      }
+      std::cout << std::endl;
+  }
+  */
+  
+  // if the correction is out of range
+  /*
+  for (std::size_t i = 0; i < n_dof_; ++i)
+  {
+    if (rsi_joint_position_corrections_[i] > limits[i]) {
+        std::cout << "Limit error link " << (i+1) << " error " << rsi_joint_position_corrections_[i] << " to limit " << limits[i] << std::endl;
+        // assign the limit
+        rsi_joint_position_corrections_[i] = limits[i];
+    }  
+  }
+  */
 
   out_buffer_ = RSICommand(rsi_joint_position_corrections_, ipoc_).xml_doc;
+  if (v != 0.0) {std::cout << out_buffer_ << std::endl;}
   server_->send(out_buffer_);
 
   return true;
@@ -136,12 +176,6 @@ void KukaHardwareInterface::start()
   ROS_INFO_STREAM_NAMED("kuka_hardware_interface", "Waiting for robot!");
 
   int bytes = server_->recv(in_buffer_);
-
-  // Drop empty <rob> frame with RSI <= 2.3
-  if (bytes < 100)
-  {
-    bytes = server_->recv(in_buffer_);
-  }
 
   rsi_state_ = RSIState(in_buffer_);
   for (std::size_t i = 0; i < n_dof_; ++i)
@@ -161,20 +195,15 @@ void KukaHardwareInterface::start()
 
 void KukaHardwareInterface::configure()
 {
-  const std::string param_addr = "rsi/listen_address";
-  const std::string param_port = "rsi/listen_port";
-
-  if (nh_.getParam(param_addr, local_host_) && nh_.getParam(param_port, local_port_))
+  if (nh_.getParam("rsi/listen_address", local_host_) && nh_.getParam("rsi/listen_port", local_port_))
   {
     ROS_INFO_STREAM_NAMED("kuka_hardware_interface",
                           "Setting up RSI server on: (" << local_host_ << ", " << local_port_ << ")");
   }
   else
   {
-    std::string msg = "Failed to get RSI listen address or listen port from"
-    " parameter server (looking for '" + param_addr + "' and '" + param_port + "')";
-    ROS_ERROR_STREAM(msg);
-    throw std::runtime_error(msg);
+    ROS_ERROR("Failed to get RSI listen address or listen port from parameter server!");
+    throw std::runtime_error("Failed to get RSI listen address or listen port from parameter server.");
   }
   rt_rsi_pub_.reset(new realtime_tools::RealtimePublisher<std_msgs::String>(nh_, "rsi_xml_doc", 3));
 }

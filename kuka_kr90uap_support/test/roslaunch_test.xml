@@ -1,0 +1,9 @@
+<launch>
+  <group ns="load_kr90r2700pro__">
+    <include file="$(find kuka_kr90uap_support)/launch/load_kr90r2700pro.launch"/>
+  </group>
+
+  <group ns="test_kr90r2700pro__">
+    <include file="$(find kuka_kr90uap_support)/launch/test_kr90r2700pro.launch"/>
+  </group>
+</launch>

@@ -43,6 +43,7 @@
 // STL
 #include <vector>
 #include <string>
+#include <iostream>
 
 // ROS
 #include <ros/ros.h>
@@ -81,6 +82,8 @@ private:
   ros::NodeHandle nh_;
 
   unsigned int n_dof_;
+  
+  bool is_plus;
 
   std::vector<std::string> joint_names_;
 
@@ -97,6 +100,8 @@ private:
   std::vector<double> rsi_initial_joint_positions_;
   std::vector<double> rsi_joint_position_corrections_;
   unsigned long long ipoc_;
+  // Added by Rune: for error checking
+  std::vector<double> limits;
 
   std::unique_ptr<realtime_tools::RealtimePublisher<std_msgs::String> > rt_rsi_pub_;
 
