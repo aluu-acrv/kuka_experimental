@@ -2,8 +2,15 @@
 <launch>
     <arg name="sim" default="true" />
 
+    <!-- switches between KUKA marvin vs KUKA 3DP -->
+    <arg name="marvin" default="false"/>
+    
     <rosparam file="$(find kuka_rsi_hw_interface)/test/test_params_sim.yaml" command="load" if="$(arg sim)"/>
     <rosparam file="$(find kuka_rsi_hw_interface)/test/test_params.yaml" command="load" unless="$(arg sim)"/>
+
+    <!-- Load universal robot description format (URDF) -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find kuka_kr90uap_support)/urdf/kr90r2700prouap.xacro'" if="$(arg marvin)"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find kuka_kr903dp_support)/urdf/kuka_kr903dp.xacro'" unless="$(arg marvin)"/>
 
     <!-- Start node without FT sensor -->
     <node name="kuka_hardware_interface" pkg="kuka_rsi_hw_interface"
@@ -12,9 +19,12 @@
       required="true"/>
 
     <!-- Load joint controller configurations from YAML file to parameter server -->
-    <rosparam file="$(find kuka_rsi_hw_interface)/config/hardware_controllers.yaml" command="load"/>
+    <rosparam file="$(find kuka_rsi_hw_interface)/config/marvin_hardware_controllers.yaml" command="load"  if="$(arg marvin)"/>
+    <rosparam file="$(find kuka_rsi_hw_interface)/config/hardware_controllers.yaml" command="load"  unless="$(arg marvin)"/>
+    
     <!-- Load standard kuka controller joint names from YAML file to parameter server -->
-    <rosparam file="$(find kuka_rsi_hw_interface)/config/controller_joint_names.yaml" command="load"/>
+    <rosparam file="$(find kuka_rsi_hw_interface)/config/marvin_controller_joint_names.yaml" command="load" if="$(arg marvin)"/>
+    <rosparam file="$(find kuka_rsi_hw_interface)/config/controller_joint_names.yaml" command="load" unless="$(arg marvin)"/>
 
     <!-- Load controllers -->
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
