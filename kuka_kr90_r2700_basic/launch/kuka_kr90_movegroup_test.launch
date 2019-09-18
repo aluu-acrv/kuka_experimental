@@ -1,0 +1,6 @@
+<launch>
+
+  <node name="kuka_kr90_movegroup_test" pkg="kuka_kr90_r2700_basic" type="kuka_kr90_movegroup_test" respawn="false" output="screen">
+  </node>
+
+</launch>
