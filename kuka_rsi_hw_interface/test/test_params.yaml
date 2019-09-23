@@ -1,4 +1,4 @@
 rsi:
 # UAP KUKA 3DP IP
   listen_address: "192.168.139.201"
-  listen_port: 49010
+  listen_port: 49152

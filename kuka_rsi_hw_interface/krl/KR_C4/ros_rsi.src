@@ -65,8 +65,11 @@ DECL INT CONTID	; ContainerID
   ;ENDFOLD (USER INI)
 ;ENDFOLD (INI)
 
-; Move to start position
-PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+; Move to start position - KUKA 3DP HOME
+;PTP {A1 0, A2 -90, A3 105, A4 0, A5 -15, A6 0}
+;; for testing 
+PTP {A1 -21.30, A2 -18, A3 54, A4 -33, A5 -41, A6 27}
+
 
 ; Create RSI Context 
 ret = RSI_CREATE("ros_rsi.rsi",CONTID,TRUE)
@@ -89,6 +92,9 @@ IF (ret <> RSIOK) THEN
   HALT
 ENDIF
 
-PTP {A1 0, A2 -90, A3 90, A4 0, A5 90, A6 0}
+; Return to start position - KUKA 3DP HOME
+;PTP {A1 0, A2 -90, A3 105, A4 0, A5 -15, A6 0}
+
+PTP {A1 -21.30, A2 -18, A3 54, A4 -33, A5 -41, A6 27}
 
 END
